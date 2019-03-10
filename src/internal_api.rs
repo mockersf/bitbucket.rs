@@ -64,12 +64,12 @@ impl API {
     pub(crate) fn get_paginated<T>(
         &self,
         url: reqwest::Url,
-    ) -> Result<crate::api::Paginated<T>, crate::error::Error>
+    ) -> Result<crate::Paginated<T>, crate::error::Error>
     where
         for<'de> T: serde::Deserialize<'de>,
     {
         let page = self.get_page(&url)?;
-        Ok(crate::api::Paginated {
+        Ok(crate::Paginated {
             has_more: page.next.is_some(),
             current_page: page,
             client: self,
@@ -91,8 +91,8 @@ impl<T> Page<T>
 where
     for<'de> T: serde::Deserialize<'de>,
 {
-    pub(crate) fn get_all_pages(self, api: &crate::API) -> crate::api::PageIterator<T> {
-        crate::api::PageIterator {
+    pub(crate) fn get_all_pages(self, api: &crate::API) -> crate::PageIterator<T> {
+        crate::PageIterator {
             next_page: self.next,
             current_page: self.values,
             api,
