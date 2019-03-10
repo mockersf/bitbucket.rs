@@ -1,6 +1,8 @@
 use crate::internal_api::AuthType;
 use crate::repository::Repository;
 
+use crate::repository::ToUrl;
+
 pub struct API {
     url: String,
     pub(crate) auth_type: Option<AuthType>,
@@ -37,9 +39,9 @@ impl API {
 
     pub fn get_repositories(
         &self,
-        team: &str,
+        request: impl Into<crate::repository::RepositoryRequest>,
     ) -> Result<Paginated<Repository>, crate::error::Error> {
-        self.get_paginated(&format!("{}/repositories/{}", self.url, team))
+        self.get_paginated(request.into().to_url(&self.url)?)
     }
 }
 
@@ -95,7 +97,9 @@ where
         match (result, &self.next_page) {
             (Some(result), _) => Some(result),
             (None, Some(ref url)) => {
-                let next = self.api.get_page::<T>(url);
+                let next = reqwest::Url::parse(url)
+                    .map_err(|_| crate::error::Error::InvalidUrl { url: url.clone() })
+                    .and_then(|url| self.api.get_page::<T>(&url));
                 match next {
                     Ok(new_page) => {
                         self.next_page = new_page.next;

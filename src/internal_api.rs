@@ -8,12 +8,12 @@ pub(crate) enum AuthType {
 }
 
 impl API {
-    pub(crate) fn authed_query(&self, url: reqwest::Url) -> reqwest::RequestBuilder {
+    pub(crate) fn authed_query(&self, url: &reqwest::Url) -> reqwest::RequestBuilder {
         let client = match self.client {
             Some(ref client) => client.clone(),
             None => reqwest::Client::new(),
         };
-        let request_builder = client.get(url);
+        let request_builder = client.get(url.as_ref());
         match self.auth_type {
             Some(AuthType::Bearer { ref token }) => request_builder.bearer_auth(token),
             Some(AuthType::Basic {
@@ -24,19 +24,15 @@ impl API {
         }
     }
 
-    pub(crate) fn get_page<T>(&self, url: &str) -> Result<Page<T>, crate::error::Error>
+    pub(crate) fn get_page<T>(&self, url: &reqwest::Url) -> Result<Page<T>, crate::error::Error>
     where
         for<'de> T: serde::Deserialize<'de>,
     {
         let text = self
-            .authed_query(reqwest::Url::parse(url).map_err(|_| {
-                crate::error::Error::InvalidUrl {
-                    url: String::from(url),
-                }
-            })?)
+            .authed_query(url)
             .send()
             .map_err(|error| crate::error::Error::Http {
-                url: String::from(url),
+                url: String::from(url.as_ref()),
                 error,
             })
             .and_then(|mut response| {
@@ -47,7 +43,7 @@ impl API {
                         serde_json::de::from_str::<BitbucketErrorWrapper>(&text).map_err(|_| ())
                     });
                     Err(crate::error::Error::ErrorResponse {
-                        url: String::from(url),
+                        url: String::from(url.as_ref()),
                         status_code: response.status(),
                         message: match error {
                             Ok(error) => error.error.message,
@@ -58,7 +54,7 @@ impl API {
             })?
             .text()
             .map_err(|error| crate::error::Error::Http {
-                url: String::from(url),
+                url: String::from(url.as_ref()),
                 error,
             })?;
         Ok(serde_json::de::from_str::<Page<T>>(&text)
@@ -67,12 +63,12 @@ impl API {
 
     pub(crate) fn get_paginated<T>(
         &self,
-        url: &str,
+        url: reqwest::Url,
     ) -> Result<crate::api::Paginated<T>, crate::error::Error>
     where
         for<'de> T: serde::Deserialize<'de>,
     {
-        let page = self.get_page(url)?;
+        let page = self.get_page(&url)?;
         Ok(crate::api::Paginated {
             has_more: page.next.is_some(),
             current_page: page,
