@@ -1,3 +1,4 @@
+use chrono::prelude::*;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -86,11 +87,11 @@ pub struct Repository {
     pub fork_policy: ForkPolicy,
     pub name: String,
     pub language: String,
-    pub created_on: String,
+    pub created_on: DateTime<Utc>,
     pub mainbranch: Option<Branch>,
     pub full_name: String,
     pub has_issues: bool,
-    pub updated_on: String,
+    pub updated_on: DateTime<Utc>,
     pub size: u32,
     #[serde(rename = "type")]
     ty: ObjectType,
