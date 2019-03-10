@@ -8,12 +8,16 @@ pub(crate) enum AuthType {
 }
 
 impl API {
-    pub(crate) fn authed_query(&self, url: &reqwest::Url) -> reqwest::RequestBuilder {
+    pub(crate) fn authed_query(
+        &self,
+        method: reqwest::Method,
+        url: &reqwest::Url,
+    ) -> reqwest::RequestBuilder {
         let client = match self.client {
             Some(ref client) => client.clone(),
             None => reqwest::Client::new(),
         };
-        let request_builder = client.get(url.as_ref());
+        let request_builder = client.request(method, url.as_ref());
         match self.auth_type {
             Some(AuthType::Bearer { ref token }) => request_builder.bearer_auth(token),
             Some(AuthType::Basic {
@@ -24,12 +28,15 @@ impl API {
         }
     }
 
-    pub(crate) fn get_page<T>(&self, url: &reqwest::Url) -> Result<Page<T>, crate::error::Error>
+    pub(crate) fn send_request_and_parse_response<T>(
+        &self,
+        request_builder: reqwest::RequestBuilder,
+        url: &reqwest::Url,
+    ) -> Result<T, crate::error::Error>
     where
         for<'de> T: serde::Deserialize<'de>,
     {
-        let text = self
-            .authed_query(url)
+        let text = request_builder
             .send()
             .map_err(|error| crate::error::Error::Http {
                 url: String::from(url.as_ref()),
@@ -57,8 +64,32 @@ impl API {
                 url: String::from(url.as_ref()),
                 error,
             })?;
-        Ok(serde_json::de::from_str::<Page<T>>(&text)
+        Ok(serde_json::de::from_str::<T>(&text)
             .map_err(|err| crate::error::Error::Deserialization(err))?)
+    }
+
+    pub(crate) fn get<T>(&self, url: &reqwest::Url) -> Result<T, crate::error::Error>
+    where
+        for<'de> T: serde::Deserialize<'de>,
+    {
+        self.send_request_and_parse_response(self.authed_query(reqwest::Method::GET, url), url)
+    }
+
+    pub(crate) fn post<T, U>(
+        &self,
+        url: &reqwest::Url,
+        request: U,
+    ) -> Result<T, crate::error::Error>
+    where
+        for<'de> T: serde::Deserialize<'de>,
+        U: serde::Serialize,
+    {
+        self.send_request_and_parse_response(
+            self.authed_query(reqwest::Method::POST, url)
+                .json(&request)
+                .header(reqwest::header::CONTENT_TYPE, "application/json"),
+            url,
+        )
     }
 
     pub(crate) fn get_paginated<T>(
@@ -68,7 +99,7 @@ impl API {
     where
         for<'de> T: serde::Deserialize<'de>,
     {
-        let page = self.get_page(&url)?;
+        let page: Page<T> = self.get(&url)?;
         Ok(crate::Paginated {
             has_more: page.next.is_some(),
             current_page: page,

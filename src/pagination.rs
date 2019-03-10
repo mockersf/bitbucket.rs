@@ -52,7 +52,7 @@ where
             (None, Some(ref url)) => {
                 let next = reqwest::Url::parse(url)
                     .map_err(|_| crate::error::Error::InvalidUrl { url: url.clone() })
-                    .and_then(|url| self.api.get_page::<T>(&url));
+                    .and_then(|url| self.api.get::<crate::internal_api::Page<T>>(&url));
                 match next {
                     Ok(new_page) => {
                         self.next_page = new_page.next;

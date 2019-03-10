@@ -25,7 +25,7 @@ pub struct RepositoryLinks {
     pub pullrequests: Link,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Scm {
     Git,

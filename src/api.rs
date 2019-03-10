@@ -43,4 +43,22 @@ impl API {
     ) -> Result<crate::Paginated<Repository>, crate::Error> {
         self.get_paginated(request.into().to_url(&self.url)?)
     }
+
+    pub fn get_repository(
+        &self,
+        request: impl Into<crate::request_params::RepositoryRequest>,
+    ) -> Result<Repository, crate::Error> {
+        self.get(&request.into().to_url(&self.url)?)
+    }
+
+    pub fn create_repository(
+        &self,
+        request: impl Into<crate::request_params::RepositoryRequest>,
+        repository_creation: impl Into<crate::request_params::RepositoryCreationRequest>,
+    ) -> Result<Repository, crate::Error> {
+        self.post(
+            &request.into().to_url(&self.url)?,
+            repository_creation.into(),
+        )
+    }
 }
