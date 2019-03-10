@@ -24,7 +24,7 @@ impl API {
         }
     }
 
-    pub(crate) fn get_paginated<T>(&self, url: &str) -> Result<Paginated<T>, crate::error::Error>
+    pub(crate) fn get_page<T>(&self, url: &str) -> Result<Page<T>, crate::error::Error>
     where
         for<'de> T: serde::Deserialize<'de>,
     {
@@ -61,13 +61,28 @@ impl API {
                 url: String::from(url),
                 error,
             })?;
-        Ok(serde_json::de::from_str::<Paginated<T>>(&text)
+        Ok(serde_json::de::from_str::<Page<T>>(&text)
             .map_err(|err| crate::error::Error::Deserialization(err))?)
+    }
+
+    pub(crate) fn get_paginated<T>(
+        &self,
+        url: &str,
+    ) -> Result<crate::api::Paginated<T>, crate::error::Error>
+    where
+        for<'de> T: serde::Deserialize<'de>,
+    {
+        let page = self.get_page(url)?;
+        Ok(crate::api::Paginated {
+            has_more: page.next.is_some(),
+            current_page: page,
+            client: self,
+        })
     }
 }
 
 #[derive(Deserialize, Debug)]
-pub(crate) struct Paginated<T> {
+pub(crate) struct Page<T> {
     pagelen: u8,
     size: Option<u16>,
     page: u8,
@@ -76,9 +91,9 @@ pub(crate) struct Paginated<T> {
     pub(crate) values: Vec<T>,
 }
 
-impl<T> Paginated<T>
+impl<T> Page<T>
 where
-    for<'zut> T: serde::Deserialize<'zut>,
+    for<'de> T: serde::Deserialize<'de>,
 {
     pub(crate) fn get_all_pages(self, api: &crate::API) -> crate::api::PageIterator<T> {
         crate::api::PageIterator {

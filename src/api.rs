@@ -38,15 +38,45 @@ impl API {
     pub fn get_repositories(
         &self,
         team: &str,
-    ) -> Result<PageIterator<Repository>, crate::error::Error> {
+    ) -> Result<Paginated<Repository>, crate::error::Error> {
         self.get_paginated(&format!("{}/repositories/{}", self.url, team))
-            .map(|v| v.get_all_pages(self))
+    }
+}
+
+pub struct Paginated<'a, T>
+where
+    for<'de> T: serde::Deserialize<'de>,
+{
+    pub has_more: bool,
+    pub(crate) current_page: crate::internal_api::Page<T>,
+    pub(crate) client: &'a crate::api::API,
+}
+
+impl<'a, T> Paginated<'a, T>
+where
+    for<'de> T: serde::Deserialize<'de>,
+{
+    pub fn current_page_values(self) -> Vec<T> {
+        self.current_page.values
+    }
+}
+
+impl<'a, T> IntoIterator for Paginated<'a, T>
+where
+    for<'de> T: serde::Deserialize<'de>,
+    T: std::fmt::Debug,
+{
+    type Item = T;
+    type IntoIter = crate::api::PageIterator<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.current_page.get_all_pages(self.client)
     }
 }
 
 pub struct PageIterator<'a, T>
 where
-    for<'zut> T: serde::Deserialize<'zut>,
+    for<'de> T: serde::Deserialize<'de>,
 {
     pub(crate) next_page: Option<String>,
     pub(crate) current_page: Vec<T>,
@@ -55,7 +85,7 @@ where
 
 impl<'a, T> Iterator for PageIterator<'a, T>
 where
-    for<'zut> T: serde::Deserialize<'zut>,
+    for<'de> T: serde::Deserialize<'de>,
     T: std::fmt::Debug,
 {
     type Item = T;
@@ -65,7 +95,7 @@ where
         match (result, &self.next_page) {
             (Some(result), _) => Some(result),
             (None, Some(ref url)) => {
-                let next = self.api.get_paginated::<T>(url);
+                let next = self.api.get_page::<T>(url);
                 match next {
                     Ok(new_page) => {
                         self.next_page = new_page.next;
