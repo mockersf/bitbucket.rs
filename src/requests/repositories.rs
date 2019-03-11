@@ -71,9 +71,8 @@ impl ToUrl for RepositoriesRequest {
             Some(username) => format!("{}/repositories/{}", base_url, username),
         };
 
-        let mut url = reqwest::Url::parse(&url).map_err(|_| crate::error::Error::InvalidUrl {
-            url: String::from(url),
-        })?;
+        let mut url =
+            reqwest::Url::parse(&url).map_err(|_| crate::error::Error::InvalidUrl { url })?;
 
         if let Some(role) = &self.role {
             url.query_pairs_mut().append_pair(

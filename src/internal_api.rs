@@ -65,8 +65,7 @@ impl API {
                 url: String::from(url.as_ref()),
                 error,
             })?;
-        Ok(serde_json::de::from_str::<T>(&text)
-            .map_err(|err| crate::error::Error::Deserialization(err))?)
+        Ok(serde_json::de::from_str::<T>(&text).map_err(crate::error::Error::Deserialization)?)
     }
 
     pub(crate) fn get<T>(&self, url: &reqwest::Url) -> Result<T, crate::error::Error>

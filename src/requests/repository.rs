@@ -24,7 +24,7 @@ impl From<(&str, String)> for RepositoryRequest {
     fn from((username, repo_slug): (&str, String)) -> Self {
         Self {
             username: String::from(username),
-            repo_slug: repo_slug,
+            repo_slug,
         }
     }
 }
@@ -32,7 +32,7 @@ impl From<(&str, String)> for RepositoryRequest {
 impl From<(String, &str)> for RepositoryRequest {
     fn from((username, repo_slug): (String, &str)) -> Self {
         Self {
-            username: username,
+            username,
             repo_slug: String::from(repo_slug),
         }
     }
@@ -41,8 +41,8 @@ impl From<(String, &str)> for RepositoryRequest {
 impl From<(String, String)> for RepositoryRequest {
     fn from((username, repo_slug): (String, String)) -> Self {
         Self {
-            username: username,
-            repo_slug: repo_slug,
+            username,
+            repo_slug,
         }
     }
 }
@@ -54,9 +54,7 @@ impl ToUrl for RepositoryRequest {
             base_url, self.username, self.repo_slug
         );
 
-        let url = reqwest::Url::parse(&url).map_err(|_| crate::error::Error::InvalidUrl {
-            url: String::from(url),
-        })?;
+        let url = reqwest::Url::parse(&url).map_err(|_| crate::error::Error::InvalidUrl { url })?;
 
         Ok(url)
     }

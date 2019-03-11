@@ -70,3 +70,9 @@ impl API {
         )
     }
 }
+
+impl Default for API {
+    fn default() -> Self {
+        Self::new()
+    }
+}
