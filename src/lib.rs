@@ -8,4 +8,7 @@ pub mod requests;
 pub use api::API;
 pub use error::Error;
 pub use pagination::{PageIterator, Paginated};
-pub use repository::*;
+
+pub mod model {
+    pub use crate::repository::*;
+}
