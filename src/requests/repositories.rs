@@ -1,8 +1,12 @@
 use super::ToUrl;
 use crate::repository::Role;
 
+/// Request for a list of repositories
+#[derive(Debug)]
 pub struct RepositoriesRequest {
+    /// username or team to list repositories of
     pub username: Option<String>,
+    /// list repositories where the current logged in user as the following role
     pub role: Option<Role>,
 }
 

@@ -1,3 +1,5 @@
+//! Wrappers for Bitbucket API request parameters
+
 mod repositories;
 mod repository;
 

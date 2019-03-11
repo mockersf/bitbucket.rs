@@ -2,8 +2,12 @@ use serde::Serialize;
 
 use super::ToUrl;
 
+/// Request a repository by it's owner and name
+#[derive(Debug)]
 pub struct RepositoryRequest {
+    /// owner of the repository
     pub username: String,
+    /// name of the repository
     pub repo_slug: String,
 }
 
@@ -58,13 +62,17 @@ impl ToUrl for RepositoryRequest {
     }
 }
 
-#[derive(Serialize, Default)]
+/// request to create a repository
+#[derive(Serialize, Default, Debug, Copy, Clone)]
 pub struct RepositoryCreationRequest {
-    is_private: Option<bool>,
-    scm: Option<crate::repository::Scm>,
+    /// is the repository private
+    pub is_private: Option<bool>,
+    /// SCM used by the new repository
+    pub scm: Option<crate::repository::Scm>,
 }
 
 impl RepositoryCreationRequest {
+    /// set the privacy of the repository that will be created
     pub fn private(self, private: bool) -> Self {
         Self {
             is_private: Some(private),
@@ -72,6 +80,7 @@ impl RepositoryCreationRequest {
         }
     }
 
+    /// set the SCM of the repository that will be created
     pub fn scm(self, scm: crate::repository::Scm) -> Self {
         Self {
             scm: Some(scm),

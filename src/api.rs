@@ -3,6 +3,8 @@ use crate::repository::Repository;
 
 use crate::requests::ToUrl;
 
+/// Bitbucket API client
+#[derive(Debug)]
 pub struct API {
     url: String,
     pub(crate) auth_type: Option<AuthType>,
@@ -10,6 +12,7 @@ pub struct API {
 }
 
 impl API {
+    /// new Bitbucket API client
     pub fn new() -> Self {
         Self {
             url: String::from("https://api.bitbucket.org/2.0"),
@@ -18,6 +21,7 @@ impl API {
         }
     }
 
+    /// set the API client to use the bearer token
     pub fn with_bearer(self, bearer: &str) -> Self {
         Self {
             auth_type: Some(AuthType::Bearer {
@@ -27,6 +31,7 @@ impl API {
         }
     }
 
+    /// set te API client to use user / password authentication
     pub fn with_basic(self, username: &str, password: &str) -> Self {
         Self {
             auth_type: Some(AuthType::Basic {
@@ -37,6 +42,7 @@ impl API {
         }
     }
 
+    /// get a list of repositories
     pub fn get_repositories(
         &self,
         request: impl Into<crate::requests::RepositoriesRequest>,
@@ -44,6 +50,7 @@ impl API {
         self.get_paginated(request.into().to_url(&self.url)?)
     }
 
+    /// get a repository
     pub fn get_repository(
         &self,
         request: impl Into<crate::requests::RepositoryRequest>,
@@ -51,6 +58,7 @@ impl API {
         self.get(&request.into().to_url(&self.url)?)
     }
 
+    /// create a repository
     pub fn create_repository(
         &self,
         request: impl Into<crate::requests::RepositoryRequest>,

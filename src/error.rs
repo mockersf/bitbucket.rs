@@ -18,19 +18,30 @@ impl fmt::Display for Error {
     }
 }
 
+/// Errors that can be returned by the API client
 #[derive(Debug)]
 pub enum Error {
+    /// Error parsing the requested URL
     InvalidUrl {
+        /// url that was requested
         url: String,
     },
+    /// HTTP error during request
     Http {
+        /// url that was requested
         url: String,
+        /// underlying error
         error: reqwest::Error,
     },
+    /// Error response by Bitbucket
     ErrorResponse {
+        /// url that was requested
         url: String,
+        /// status code returned by Bitbucket
         status_code: reqwest::StatusCode,
+        /// message provided by Bitbucket
         message: String,
     },
+    /// Error deserializing Bitbucket response
     Deserialization(serde_json::error::Error),
 }

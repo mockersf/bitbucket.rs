@@ -2,6 +2,7 @@ use serde::Deserialize;
 
 use crate::api::API;
 
+#[derive(Debug)]
 pub(crate) enum AuthType {
     Bearer { token: String },
     Basic { username: String, password: String },
@@ -34,7 +35,7 @@ impl API {
         url: &reqwest::Url,
     ) -> Result<T, crate::error::Error>
     where
-        for<'de> T: serde::Deserialize<'de>,
+        for<'de> T: Deserialize<'de>,
     {
         let text = request_builder
             .send()
@@ -70,7 +71,7 @@ impl API {
 
     pub(crate) fn get<T>(&self, url: &reqwest::Url) -> Result<T, crate::error::Error>
     where
-        for<'de> T: serde::Deserialize<'de>,
+        for<'de> T: Deserialize<'de>,
     {
         self.send_request_and_parse_response(self.authed_query(reqwest::Method::GET, url), url)
     }
@@ -81,7 +82,7 @@ impl API {
         request: U,
     ) -> Result<T, crate::error::Error>
     where
-        for<'de> T: serde::Deserialize<'de>,
+        for<'de> T: Deserialize<'de>,
         U: serde::Serialize,
     {
         self.send_request_and_parse_response(
@@ -97,7 +98,7 @@ impl API {
         url: reqwest::Url,
     ) -> Result<crate::Paginated<T>, crate::error::Error>
     where
-        for<'de> T: serde::Deserialize<'de>,
+        for<'de> T: Deserialize<'de>,
     {
         let page: Page<T> = self.get(&url)?;
         Ok(crate::Paginated {
@@ -120,9 +121,9 @@ pub(crate) struct Page<T> {
 
 impl<T> Page<T>
 where
-    for<'de> T: serde::Deserialize<'de>,
+    for<'de> T: Deserialize<'de>,
 {
-    pub(crate) fn get_all_pages(self, api: &crate::API) -> crate::PageIterator<T> {
+    pub(crate) fn get_all_pages(self, api: &API) -> crate::PageIterator<T> {
         crate::PageIterator {
             next_page: self.next,
             current_page: self.values,

@@ -25,14 +25,14 @@ pub struct RepositoryLinks {
     pub pullrequests: Link,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Scm {
     Git,
     Mercurial,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ForkPolicy {
     NoPublicForks,
@@ -40,7 +40,7 @@ pub enum ForkPolicy {
     AllowForks,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ObjectType {
     Branch,
@@ -107,7 +107,7 @@ pub struct Branch {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Role {
     Admin,

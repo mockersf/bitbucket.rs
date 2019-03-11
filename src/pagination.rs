@@ -1,7 +1,10 @@
+/// A page from a paginated response.
+#[derive(Debug)]
 pub struct Paginated<'a, T>
 where
     for<'de> T: serde::Deserialize<'de>,
 {
+    /// Are there more pages?
     pub has_more: bool,
     pub(crate) current_page: crate::internal_api::Page<T>,
     pub(crate) client: &'a crate::api::API,
@@ -11,6 +14,7 @@ impl<'a, T> Paginated<'a, T>
 where
     for<'de> T: serde::Deserialize<'de>,
 {
+    /// Get the values of the current page.
     pub fn current_page_values(self) -> Vec<T> {
         self.current_page.values
     }
@@ -22,13 +26,16 @@ where
     T: std::fmt::Debug,
 {
     type Item = T;
-    type IntoIter = crate::PageIterator<'a, T>;
+    type IntoIter = PageIterator<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.current_page.get_all_pages(self.client)
     }
 }
 
+/// Iterator over all values and across pages, built from a paginated response. Iterating
+/// over it will requests new pages from Bitbucket API as needed.
+#[derive(Debug)]
 pub struct PageIterator<'a, T>
 where
     for<'de> T: serde::Deserialize<'de>,
