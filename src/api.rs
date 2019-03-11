@@ -1,7 +1,7 @@
 use crate::internal_api::AuthType;
 use crate::repository::Repository;
 
-use crate::request_params::ToUrl;
+use crate::requests::ToUrl;
 
 pub struct API {
     url: String,
@@ -39,22 +39,22 @@ impl API {
 
     pub fn get_repositories(
         &self,
-        request: impl Into<crate::request_params::RepositoriesRequest>,
+        request: impl Into<crate::requests::RepositoriesRequest>,
     ) -> Result<crate::Paginated<Repository>, crate::Error> {
         self.get_paginated(request.into().to_url(&self.url)?)
     }
 
     pub fn get_repository(
         &self,
-        request: impl Into<crate::request_params::RepositoryRequest>,
+        request: impl Into<crate::requests::RepositoryRequest>,
     ) -> Result<Repository, crate::Error> {
         self.get(&request.into().to_url(&self.url)?)
     }
 
     pub fn create_repository(
         &self,
-        request: impl Into<crate::request_params::RepositoryRequest>,
-        repository_creation: impl Into<crate::request_params::RepositoryCreationRequest>,
+        request: impl Into<crate::requests::RepositoryRequest>,
+        repository_creation: impl Into<crate::requests::RepositoryCreationRequest>,
     ) -> Result<Repository, crate::Error> {
         self.post(
             &request.into().to_url(&self.url)?,
