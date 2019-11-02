@@ -10,6 +10,7 @@
     unused_qualifications,
     // missing_docs
 )]
+#![allow(clippy::type_repetition_in_bounds)]
 
 //!
 //! Bitbucket API Wrapper
