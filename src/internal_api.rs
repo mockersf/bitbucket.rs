@@ -13,10 +13,10 @@ impl API {
         &self,
         method: reqwest::Method,
         url: &reqwest::Url,
-    ) -> reqwest::RequestBuilder {
+    ) -> reqwest::blocking::RequestBuilder {
         let client = match self.client {
             Some(ref client) => client.clone(),
-            None => reqwest::Client::new(),
+            None => reqwest::blocking::Client::new(),
         };
         let request_builder = client.request(method, url.as_ref());
         match self.auth_type {
@@ -31,7 +31,7 @@ impl API {
 
     pub(crate) fn send_request_and_parse_response<T>(
         &self,
-        request_builder: reqwest::RequestBuilder,
+        request_builder: reqwest::blocking::RequestBuilder,
         url: &reqwest::Url,
     ) -> Result<T, crate::error::Error>
     where
@@ -43,8 +43,9 @@ impl API {
                 url: String::from(url.as_ref()),
                 error,
             })
-            .and_then(|mut response| {
-                if response.status().is_success() {
+            .and_then(|response| {
+                let response_status = response.status();
+                if response_status.is_success() {
                     Ok(response)
                 } else {
                     let error = response.text().map_err(|_| ()).and_then(|text| {
@@ -52,7 +53,7 @@ impl API {
                     });
                     Err(crate::error::Error::ErrorResponse {
                         url: String::from(url.as_ref()),
-                        status_code: response.status(),
+                        status_code: response_status,
                         message: match error {
                             Ok(error) => error.error.message,
                             _ => String::from("unspecified error"),

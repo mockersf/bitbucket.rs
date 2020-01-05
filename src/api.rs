@@ -8,7 +8,7 @@ use crate::requests::ToUrl;
 pub struct API {
     url: String,
     pub(crate) auth_type: Option<AuthType>,
-    pub(crate) client: Option<reqwest::Client>,
+    pub(crate) client: Option<reqwest::blocking::Client>,
 }
 
 impl API {
