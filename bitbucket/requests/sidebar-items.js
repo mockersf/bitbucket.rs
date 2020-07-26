@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RepositoriesRequest","Request for a list of repositories"],["RepositoryCreationRequest","request to create a repository"],["RepositoryRequest","Request a repository by it's owner and name"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ForkPolicy",""],["ObjectType",""],["Role",""],["Scm",""]],"struct":[["Branch",""],["Link",""],["Owner",""],["Project",""],["Repository",""],["RepositoryLinks",""],["ShortLinks",""]]});
